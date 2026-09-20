@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Guía de Audio — HK · Macao · Japón 2026</title>
+<style>
+:root {
+  --dark: #0f0f1a; --card: #1a1a2e; --accent: #e94560; --gold: #f5a623;
+  --text: #f0f0f0; --text2: #aaaaaa;
+  --border: rgba(255,255,255,0.1); --radius: 14px;
+  padding-top: env(safe-area-inset-top, 0px);
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html, body { background: var(--dark); color: var(--text); font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; min-height: 100%; }
+
+.hero { background: linear-gradient(135deg, #0f0f1a 0%, #1a1a2e 50%, #16213e 100%); padding: 2rem 1.25rem 1.5rem; text-align: center; border-bottom: 1px solid var(--border); }
+.hero h1 { font-size: 1.5rem; font-weight: 700; letter-spacing: -0.5px; margin-bottom: 0.25rem; }
+.hero p { color: var(--text2); font-size: 0.85rem; }
+.hero .emoji-row { font-size: 1.8rem; margin-bottom: 0.75rem; }
+
+.city-section { margin: 1.5rem 0 0; }
+.city-header { display: flex; align-items: center; gap: 10px; padding: 0.75rem 1.25rem; position: sticky; top: 0; z-index: 10; background: var(--dark); border-bottom: 1px solid var(--border); }
+.city-flag { font-size: 1.4rem; }
+.city-name { font-size: 1rem; font-weight: 700; }
+.city-dates { font-size: 0.75rem; color: var(--text2); }
+.cards { padding: 1rem 1.25rem; display: flex; flex-direction: column; gap: 1rem; }
+
+.intro-card { background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%); border-radius: var(--radius); border: 1px solid rgba(245,166,35,0.4); overflow: hidden; transition: border-color 0.2s; }
+.intro-card.playing { border-color: var(--gold); }
+.intro-card.done { border-color: rgba(39,174,96,0.5); }
+.intro-banner { background: linear-gradient(90deg, rgba(245,166,35,0.15) 0%, transparent 100%); padding: 0.9rem 1rem; display: flex; align-items: center; gap: 10px; }
+.intro-badge { background: var(--gold); color: #1a1a2e; font-size: 0.65rem; font-weight: 800; padding: 3px 8px; border-radius: 6px; text-transform: uppercase; flex-shrink: 0; }
+.intro-title { font-size: 0.95rem; font-weight: 700; color: var(--gold); }
+.intro-sub { font-size: 0.75rem; color: var(--text2); margin-top: 2px; }
+
+.place-card { background: var(--card); border-radius: var(--radius); border: 1px solid var(--border); overflow: hidden; transition: border-color 0.2s; }
+.place-card.playing { border-color: var(--accent); }
+.place-card.done { border-color: rgba(39,174,96,0.5); }
+.card-top { display: flex; align-items: center; gap: 12px; padding: 1rem; }
+.place-icon { width: 44px; height: 44px; border-radius: 10px; flex-shrink: 0; display: flex; align-items: center; justify-content: center; font-size: 1.3rem; }
+.place-info { flex: 1; min-width: 0; }
+.place-name { font-size: 0.95rem; font-weight: 600; margin-bottom: 2px; }
+.place-desc { font-size: 0.78rem; color: var(--text2); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.place-duration { font-size: 0.72rem; color: var(--text2); margin-top: 3px; }
+.card-bottom { padding: 0 1rem 1rem; }
+
+.play-btn { width: 100%; padding: 11px; border-radius: 10px; border: none; cursor: pointer; font-size: 0.88rem; font-weight: 600; display: flex; align-items: center; justify-content: center; gap: 8px; transition: all 0.2s; background: var(--accent); color: white; }
+.play-btn.intro-play { background: var(--gold); color: #1a1a2e; }
+.play-btn.speaking { background: #c0392b; color: white; }
+.play-btn.done-btn { background: #27ae60; color: white; }
+.play-btn.unavailable { background: #333; color: #777; cursor: not-allowed; }
+
+.progress-bar { height: 3px; background: rgba(255,255,255,0.1); border-radius: 2px; margin: 0.75rem 0 0.5rem; display: none; }
+.progress-bar.visible { display: block; }
+.progress-fill { height: 100%; border-radius: 2px; background: var(--accent); transition: width 0.5s linear; }
+.intro-card .progress-fill { background: var(--gold); }
+
+.badge { display: inline-block; font-size: 0.65rem; font-weight: 700; padding: 2px 7px; border-radius: 6px; margin-left: 6px; vertical-align: middle; text-transform: uppercase; }
+.badge-night { background: rgba(124,77,255,0.25); color: #b39ddb; }
+.badge-atp { background: rgba(233,69,96,0.25); color: #ef9a9a; }
+
+.status-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+.dot-pending { background: #555; }
+.dot-playing { background: var(--accent); animation: pulse 1s infinite; }
+.dot-done { background: #27ae60; }
+.dot-unavailable { background: #333; }
+@keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.4} }
+
+.coming-soon { font-size: 0.72rem; color: #555; margin-top: 5px; text-align: center; }
+.footer { text-align: center; padding: 2rem 1rem; color: var(--text2); font-size: 0.75rem; border-top: 1px solid var(--border); margin-top: 1rem; }
+</style>
+</head>
+<body>
+
+<div class="hero">
+  <div class="emoji-row">🌏</div>
+  <h1>HK · Macao · Japón 2026</h1>
+  <p>Guía de audio · 26 Sep – 7 Oct · 3 amigos</p>
+</div>
+
+<div id="content"></div>
+<div class="footer">Toca "Escuchar" al llegar a cada lugar</div>
+
+<script>
+const BASE = "https://rodobor01.github.io/viaje2026/";
+
+const CITIES = [
+  {
+    city: "🇭🇰 Hong Kong", dates: "26 Sep",
+    intro: { id:"intro_hk", name:"Bienvenidos a Hong Kong", sub:"Intro de ciudad · 7 min", file:"intro_hk.mp3", ready:true },
+    places: [
+      { id:"hk1", icon:"🌃", color:"#1a237e", name:"Victoria Harbour & Avenida de las Estrellas", desc:"El skyline más famoso de Asia", mins:"7 min", file:"hk1.mp3", ready:false },
+      { id:"hk2", icon:"🍺", color:"#4a148c", name:"Lan Kwai Fong", desc:"El barrio de bares más famoso de HK", mins:"6 min", badge:"night", badgeLabel:"Noche", file:"hk2.mp3", ready:false },
+      { id:"hk3", icon:"🎭", color:"#880e4f", name:"Wan Chai", desc:"El barrio más adulto y local de HK", mins:"6 min", badge:"night", badgeLabel:"Noche", file:"hk3.mp3", ready:false }
+    ]
+  },
+  {
+    city: "🎰 Macao", dates: "27–29 Sep",
+    intro: { id:"intro_mc", name:"Bienvenidos a Macao", sub:"Intro de ciudad · 7 min", file:"intro_mc.mp3", ready:false },
+    places: [
+      { id:"mc1", icon:"⛪", color:"#b71c1c", name:"Casco Histórico de Macao", desc:"Ruinas de São Paulo y Largo do Senado", mins:"7 min", file:"mc1.mp3", ready:false },
+      { id:"mc2", icon:"🎰", color:"#1b5e20", name:"Cotai Strip & Casinos", desc:"El Las Vegas de Asia", mins:"7 min", badge:"night", badgeLabel:"Noche", file:"mc2.mp3", ready:false },
+      { id:"mc3", icon:"💃", color:"#004d40", name:"Club Cubic", desc:"El mejor club de Macao y Asia", mins:"5 min", badge:"night", badgeLabel:"Noche", file:"mc3.mp3", ready:false }
+    ]
+  },
+  {
+    city: "🇯🇵 Osaka", dates: "30 Sep – 3 Oct",
+    intro: { id:"intro_os", name:"Bienvenidos a Osaka", sub:"Intro de ciudad · 7 min", file:"intro_os.mp3", ready:false },
+    places: [
+      { id:"os1", icon:"🦑", color:"#e65100", name:"Dotonbori & Kuromon Market", desc:"El corazón gastronómico de Osaka", mins:"7 min", file:"os1.mp3", ready:false },
+      { id:"os2", icon:"🏯", color:"#37474f", name:"Castillo de Osaka", desc:"El símbolo histórico de la ciudad", mins:"7 min", file:"os2.mp3", ready:false },
+      { id:"os3", icon:"🦌", color:"#2e7d32", name:"Nara Park", desc:"Los ciervos sagrados de Japón", mins:"7 min", file:"os3.mp3", ready:false },
+      { id:"os4", icon:"⛩️", color:"#1565c0", name:"Tōdai-ji", desc:"El templo de madera más grande del mundo", mins:"7 min", file:"os4.mp3", ready:false },
+      { id:"os5", icon:"🍺", color:"#4a148c", name:"Amerika-Mura & Club Pure", desc:"La noche más animada de Osaka", mins:"6 min", badge:"night", badgeLabel:"Noche", file:"os5.mp3", ready:false }
+    ]
+  },
+  {
+    city: "🏯 Kioto", dates: "1 Oct (day trip)",
+    intro: { id:"intro_ky", name:"Bienvenidos a Kioto", sub:"Intro de ciudad · 7 min", file:"intro_ky.mp3", ready:false },
+    places: [
+      { id:"ky1", icon:"⛩️", color:"#b71c1c", name:"Fushimi Inari", desc:"Miles de torii rojos en la montaña", mins:"7 min", file:"ky1.mp3", ready:false },
+      { id:"ky2", icon:"🏮", color:"#4a148c", name:"Gion", desc:"El barrio de las geishas", mins:"7 min", file:"ky2.mp3", ready:false },
+      { id:"ky3", icon:"🛒", color:"#1b5e20", name:"Nishiki Market", desc:"400 años de historia gastronómica", mins:"6 min", file:"ky3.mp3", ready:false }
+    ]
+  },
+  {
+    city: "🗼 Tokyo", dates: "3–6 Oct",
+    intro: { id:"intro_tk", name:"Bienvenidos a Tokyo", sub:"Intro de ciudad · 7 min", file:"intro_tk.mp3", ready:false },
+    places: [
+      { id:"tk1", icon:"🐟", color:"#01579b", name:"Tsukiji Outer Market", desc:"El mejor sushi del mundo", mins:"7 min", file:"tk1.mp3", ready:false },
+      { id:"tk2", icon:"🛕", color:"#e65100", name:"Asakusa & Senso-ji", desc:"El templo más antiguo de Tokyo", mins:"7 min", file:"tk2.mp3", ready:false },
+      { id:"tk3", icon:"🎨", color:"#4a148c", name:"TeamLab Planets", desc:"Arte digital inmersivo en Toyosu", mins:"6 min", file:"tk3.mp3", ready:false },
+      { id:"tk4", icon:"🚶", color:"#37474f", name:"Shibuya Crossing", desc:"El cruce más famoso del planeta", mins:"6 min", file:"tk4.mp3", ready:false },
+      { id:"tk5", icon:"🍶", color:"#880e4f", name:"Golden Gai", desc:"200 bares diminutos en Shinjuku", mins:"6 min", badge:"night", badgeLabel:"Noche", file:"tk5.mp3", ready:false },
+      { id:"tk6", icon:"🎾", color:"#c62828", name:"ATP Japan Open 500", desc:"Semifinales · 5 Oct", mins:"6 min", badge:"atp", badgeLabel:"ATP", file:"tk6.mp3", ready:false },
+      { id:"tk7", icon:"🥃", color:"#1b5e20", name:"Bar Benfiddich", desc:"El mejor whisky japonés de Tokyo", mins:"5 min", badge:"night", badgeLabel:"Noche", file:"tk7.mp3", ready:false }
+    ]
+  }
+];
+
+let currentAudio = null;
+let currentCardId = null;
+let currentInterval = null;
+
+function stopCurrent() {
+  if (currentAudio) { currentAudio.pause(); currentAudio = null; }
+  if (currentInterval) { clearInterval(currentInterval); currentInterval = null; }
+  if (currentCardId) {
+    const card = document.getElementById('card-' + currentCardId);
+    if (card && !card.classList.contains('done')) {
+      card.classList.remove('playing');
+      const isIntro = card.classList.contains('intro-card');
+      const btn = card.querySelector('.play-btn');
+      const dot = card.querySelector('.status-dot');
+      const prog = card.querySelector('.progress-bar');
+      if (btn) { btn.className = isIntro ? 'play-btn intro-play' : 'play-btn'; btn.innerHTML = isIntro ? '&#9654; Escuchar intro de ciudad' : '&#9654; Escuchar guía'; }
+      if (dot) dot.className = 'status-dot dot-pending';
+      if (prog) prog.classList.remove('visible');
+    }
+    currentCardId = null;
+  }
+}
+
+function playFile(cardId, file, isIntro) {
+  if (currentCardId === cardId) { stopCurrent(); return; }
+  stopCurrent();
+
+  const card = document.getElementById('card-' + cardId);
+  const btn = card.querySelector('.play-btn');
+  const dot = card.querySelector('.status-dot');
+  const prog = card.querySelector('.progress-bar');
+  const fill = card.querySelector('.progress-fill');
+
+  const audio = new Audio(BASE + file);
+  currentAudio = audio;
+  currentCardId = cardId;
+  card.classList.add('playing');
+  btn.className = 'play-btn speaking';
+  btn.innerHTML = '&#9646;&#9646; Pausar';
+  dot.className = 'status-dot dot-playing';
+  prog.classList.add('visible');
+
+  currentInterval = setInterval(() => {
+    if (audio.duration) fill.style.width = (audio.currentTime / audio.duration * 100) + '%';
+  }, 500);
+
+  audio.onended = () => {
+    clearInterval(currentInterval);
+    fill.style.width = '100%';
+    card.classList.remove('playing');
+    card.classList.add('done');
+    btn.className = 'play-btn done-btn';
+    btn.innerHTML = '&#10003; Completado';
+    dot.className = 'status-dot dot-done';
+    currentAudio = null; currentCardId = null; currentInterval = null;
+  };
+
+  audio.onerror = () => {
+    stopCurrent();
+    btn.innerHTML = '&#9654; Error — intenta de nuevo';
+  };
+
+  audio.play();
+}
+
+function buildUI() {
+  const content = document.getElementById('content');
+  CITIES.forEach(city => {
+    const section = document.createElement('div');
+    section.className = 'city-section';
+    section.innerHTML = `
+      <div class="city-header">
+        <span class="city-flag">${city.city.split(' ')[0]}</span>
+        <div><div class="city-name">${city.city.split(' ').slice(1).join(' ')}</div><div class="city-dates">${city.dates}</div></div>
+      </div>
+      <div class="cards"></div>`;
+    content.appendChild(section);
+    const cardsDiv = section.querySelector('.cards');
+
+    // INTRO
+    const intro = city.intro;
+    const iCard = document.createElement('div');
+    iCard.className = 'intro-card'; iCard.id = 'card-' + intro.id;
+    iCard.innerHTML = `
+      <div class="intro-banner">
+        <span class="intro-badge">Intro</span>
+        <div><div class="intro-title">${intro.name}</div><div class="intro-sub">${intro.sub}</div></div>
+        <div class="status-dot ${intro.ready ? 'dot-pending' : 'dot-unavailable'}" style="margin-left:auto"></div>
+      </div>
+      <div class="card-bottom">
+        <div class="progress-bar"><div class="progress-fill" style="width:0%"></div></div>
+        ${intro.ready
+          ? `<button class="play-btn intro-play" onclick="playFile('${intro.id}','${intro.file}',true)">&#9654; Escuchar intro de ciudad</button>`
+          : `<button class="play-btn unavailable" disabled>&#8987; Próximamente</button>`
+        }
+      </div>`;
+    cardsDiv.appendChild(iCard);
+
+    // PLACES
+    city.places.forEach(place => {
+      const badgeHtml = place.badge ? `<span class="badge badge-${place.badge}">${place.badgeLabel}</span>` : '';
+      const pCard = document.createElement('div');
+      pCard.className = 'place-card'; pCard.id = 'card-' + place.id;
+      pCard.innerHTML = `
+        <div class="card-top">
+          <div class="place-icon" style="background:${place.color}20;border:1px solid ${place.color}40">${place.icon}</div>
+          <div class="place-info">
+            <div class="place-name">${place.name}${badgeHtml}</div>
+            <div class="place-desc">${place.desc}</div>
+            <div class="place-duration">Duración aprox: ${place.mins}</div>
+          </div>
+          <div class="status-dot ${place.ready ? 'dot-pending' : 'dot-unavailable'}"></div>
+        </div>
+        <div class="card-bottom">
+          <div class="progress-bar"><div class="progress-fill" style="width:0%"></div></div>
+          ${place.ready
+            ? `<button class="play-btn" onclick="playFile('${place.id}','${place.file}',false)">&#9654; Escuchar guía</button>`
+            : `<button class="play-btn unavailable" disabled>&#8987; Próximamente</button>`
+          }
+        </div>`;
+      cardsDiv.appendChild(pCard);
+    });
+  });
+}
+
+buildUI();
+</script>
+</body>
+</html>
